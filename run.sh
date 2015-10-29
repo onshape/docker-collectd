@@ -32,7 +32,7 @@ fi
 AWS_UNIQUE_ID=$(curl -s --connect-timeout 1 http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.instanceId + "_" + .accountId + "_" + .region')
 
 [ -n "$AWS_UNIQUE_ID" ] && AWS_VALUE="?sfxdim_AWSUniqueId=$AWS_UNIQUE_ID"
-
+[ -z "$AWS_UNIQUE_ID" ] && AWS_VALUE="?sfxdim_$COLLECTD_SFXDIM"
 
 sed -i -e "s#%%%INTERVAL%%%#$COLLECTD_INTERVAL#g" $COLLECTD_CONF
 sed -i -e "s#%%%HOSTNAME%%%#$HOSTNAME#g" $COLLECTD_CONF

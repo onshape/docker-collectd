@@ -7,15 +7,14 @@ statistics periodically and provides mechanisms to store the values in a
 variety of ways, for example in RRD files.
 
 This image allows you to run collectd in a completelly containerized
-environment, but while retaining the ability to report statistics about the
-_host_ the collectd container is running on.
+environment, but while retaining the ability to report statistics about the _host_ the collectd container is running on. The container includes configuring the statsd plugin to forward data from inbound statsd packets to SignalFX
 
 ## How to use this image
 
-Run collectd with the default configuration with the following command:
+Run collectd with the default configuration including forwarding UDP packets from the external port to port 8125 (the statsd listener within collectd) with the following command:
 
 ```
-docker run --privileged -e "SF_API_TOKEN=XXXXXXXXXXXXXXXXXXXXXX" \
+docker run --privileged -p<external-port>:8125/udp -e "SF_API_TOKEN=XXXXXXXXXXXXXXXXXXXXXX" \
   -v /proc:/mnt/proc:ro quay.io/signalfuse/collectd
 ```
 
@@ -33,7 +32,7 @@ can put `SF_API_TOKEN=XXXXXXXXXXXXXXXXXXXXXX` into a file (that you can
 `chmod 600`) and use the `--env-file` command-line argument:
 
 ```
-docker run --privileged --env-file=token.env \
+docker run --privileged -p<external-port>:8125/udp --env-file=token.env \
   -v /proc:/mnt/proc:ro quay.io/signalfuse/collectd
 ```
 
@@ -61,9 +60,10 @@ following:
 1. `COLLECTD_HOSTNAME` - if set we will set this in
    `/etc/collectd/collectd.conf`, otherwise collectd will use DNS to figure
    out your hostname.
-1. `COLLECTD_INTERVAL` - if set we will use the specified interval for collectd 
+1. `COLLECTD_INTERVAL` - if set we will use the specified interval for collectd
    and the plugin, otherwise the default interval is 10 seconds.
 1. `COLLECTD_CONFIGS` - if set we will include `$COLLECTD_CONFIGS/*.conf` in
    collectd.conf where you can include any other plugins you want to enable.
 1. `COLLECTD_BUFFERSIZE` - if set we will set `write_http`'s buffersize to the
    value provided, otherwise a default value of 16384 will be used.
+1. `COLLECTD_SFXDIM` - if your docker is not running in an AWS instance supply the `COLLECTD_SFXDIM` environment variable to configure the sfxdim and suffix: `COLLECTD_SFXDIM=InstanceId=xxxyyyzzz`
